@@ -1,0 +1,88 @@
+resource "azurerm_resource_group" "resourcegroup"{
+    name = "Test121"
+    location = "North Europe"
+}
+
+resource "azurerm_network_security_group" "securitygroup"{
+    name                            = "ACPtestNSG"
+    resource_group_name             = azurerm_resource_group.resourcegroup.name
+    location                        = azurerm_resource_group.resourcegroup.location
+
+    tags = {
+        environment = "DEV"
+    }
+    security_rule {
+        name                        = "ACP_Violation_IN_rule01"
+        priority                    = 4094
+        direction                   = "Inbound"
+        access                      = "Allow"
+        protocol                    = "*"
+        source_port_range           = "*"
+        destination_port_range      = "*"
+        source_address_prefix       = "VirtualNetwork"
+        destination_address_prefix  = "VirtualNetwork"
+        description                 = "This is tested through Automation"
+    }
+    security_rule {
+        name                        = "ACP_Violation_IN_rule02"
+        priority                    = 4095
+        direction                   = "Inbound"
+        access                      = "Allow"
+        protocol                    = "*"
+        source_port_range           = "*"
+        destination_port_range      = "*"
+        source_address_prefix       = "AzureLoadBalancer"
+        destination_address_prefix  = "*"
+        description                 = "This is tested through Automation"
+    }
+    security_rule {
+        name                        = "ACP_Violation_IN_rule03"
+        priority                    = 4096
+        direction                   = "Inbound"
+        access                      = "Deny"
+        protocol                    = "*"
+        source_port_range           = "*"
+        destination_port_range      = "*"
+        source_address_prefix       = "*"
+        destination_address_prefix  = "*"
+        description                 = "This is tested through Automation"
+    }
+        security_rule {
+        name                        = "ACP_Violation_OUT_rule01"
+        priority                    = 4094
+        direction                   = "Outbound"
+        access                      = "Allow"
+        protocol                    = "*"
+        source_port_range           = "*"
+        destination_port_range      = "*"
+        source_address_prefix       = "VirtualNetwork"
+        destination_address_prefix  = "VirtualNetwork"
+        description                 = "This is tested through Automation"
+    }
+    security_rule {
+        name                        = "ACP_Violation_OUT_rule02"
+        priority                    = 4095
+        direction                   = "Outbound"
+        access                      = "Allow"
+        protocol                    = "*"
+        source_port_range           = "*"
+        destination_port_range      = "*"
+        source_address_prefix       = "*"
+        destination_address_prefix  = "Internet"
+        description                 = "This is tested through Automation"
+    }
+    security_rule {
+        name                        = "ACP_Violation_OUT_rule03"
+        priority                    = 4096
+        direction                   = "Outbound"
+        access                      = "Deny"
+        protocol                    = "*"
+        source_port_range           = "*"
+        destination_port_range      = "*"
+        source_address_prefix       = "*"
+        destination_address_prefix  = "*"
+        description                 = "This is tested through Automation"
+        source_address_prefixes     = null
+        destination_address_prefixes= null
+    }
+}
