@@ -20,15 +20,13 @@ steps:
     terraformVersion: '0.12.28'
 
 - task: TerraformTaskV1@0
-  displayName: terraform init
   inputs:
     provider: 'azurerm'
     command: 'init'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/skip-step'
-    backendServiceArm: 'Vishalbajpai-SP'
-    backendAzureRmResourceGroupName: 'Testing'
+    backendServiceArm: 'Vishal Bajpai(e6f05ee7-c125-4f22-8062-3bd1a14c72a1)'
+    backendAzureRmResourceGroupName: 'Kubernetes'
     backendAzureRmStorageAccountName: '$(storageAccount)'
-    backendAzureRmContainerName: '$(container)'
+    backendAzureRmContainerName: '$(Container)'
     backendAzureRmKey: '$(tfstateFile)'
 
 - task: TerraformTaskV1@0
@@ -40,25 +38,6 @@ steps:
     commandOptions: '-out=tfplan'
     environmentServiceNameAzureRM: 'Vishalbajpai-SP'
 
-- task: PowerShell@2
-  displayName: detect any terraform change
-  inputs:
-    workingDirectory: '$(System.DefaultWorkingDirectory)/skip-step'
-    targetType: 'inline'
-    script: |
-      # Write-Host "LASTEXITCODE : $LASTEXITCODE"
-      $plan = $(terraform show -json tfplan | ConvertFrom-Json)
-      $actions = $plan.resource_changes.change.actions
-      Write-Host "Terraform actions : $actions"
-      if (($actions -contains 'create') -or ($actions -contains 'delete') -or ($actions -contains 'update'))
-      {
-        Write-Host "Terraform will perform the following actions : $actions"
-        Write-Host "##vso[task.setvariable variable=anyTfChanges;]true"
-      }
-      else
-      {
-        Write-Host "There is no change detected in Terraform tfplan file"
-      }
 - task: TerraformTaskV1@0
   displayName: terraform apply tfplan
   condition: eq(variables.anyTfChanges, true)
@@ -67,4 +46,4 @@ steps:
     command: 'apply'
     workingDirectory: '$(System.DefaultWorkingDirectory)/skip-step'
     commandOptions: 'tfplan'
-    environmentServiceNameAzureRM: 'Vishalbajpai-SP'
+    environmentServiceNameAzureRM: 'Vishal Bajpai(1)(e6f05ee7-c125-4f22-8062-3bd1a14c72a1)'
