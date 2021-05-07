@@ -1,0 +1,79 @@
+provider "azurerm" {
+    tenant_id = "<tenant ID>"
+    subscription_id = "<Subscription ID>"
+    client_id = "<Client ID>"
+    client_secret = "<Client secret>"
+    version = "2.23.0"
+    features {}
+}
+
+data "azurerm_resource_group" "resourceGroups01"{
+    name = "RG-FCA"
+}
+
+data "azurerm_resource_group" "resourceGroups02"{
+    name = "POMS-VPN"
+}
+
+data "azurerm_virtual_network" "vNet" {
+    name = "POMS-VN-01"
+    resource_group_name = data.azurerm_resource_group.resourceGroups02.name
+}
+
+data "azurerm_subnet" "subnet01" {
+    name = "FCA_HOME_SN01"
+    resource_group_name = data.azurerm_resource_group.resourceGroups02.name
+    virtual_network_name = data.azurerm_virtual_network.vNet.name
+}
+
+data "azurerm_subnet" "subnet02" {
+    name = "FCA_TRAVEL_SN01"
+    resource_group_name = data.azurerm_resource_group.resourceGroups02.name
+    virtual_network_name = data.azurerm_virtual_network.vNet.name
+}
+
+resource "azurerm_network_interface" "nic" {
+    name                      = "DC-FCA-DEV02-NIC01"
+    location                  = "North Europe"
+    resource_group_name        = data.azurerm_resource_group.resourceGroups01.name
+
+    ip_configuration {
+        name                          = "nicConfiguration"
+        subnet_id                     = data.azurerm_subnet.subnet01.id
+        private_ip_address_allocation = "Dynamic"
+    }
+
+    tags = {
+        environment = "FCA"
+    }
+}
+
+# Create virtual machine
+resource "azurerm_windows_virtual_machine" "windowsVM" {
+    name                  = "DC-FCA-DEV02"
+    location              = "North Europe"
+    resource_group_name   = data.azurerm_resource_group.resourceGroups01.name
+    network_interface_ids = [azurerm_network_interface.nic.id]
+    size                  = "Standard_E2_v3"
+
+    os_disk {
+        name              = "DC-FCA-DEV02-OSDISK"
+        caching           = "None"
+        storage_account_type = "Standard_LRS"
+    }
+
+    source_image_reference {
+        publisher = "MicrosoftWindowsServer"
+        offer     = "WindowsServer"
+        sku       = "2012-R2-Datacenter"
+        version   = "latest"
+    }
+
+    computer_name  = "DC-FCA-DEV02"
+    admin_username = "adm-poms"
+    admin_password = "Welcome@12345"
+
+    tags = {
+        environment = "FCA"
+    }
+}
